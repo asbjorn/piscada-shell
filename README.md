@@ -11,6 +11,16 @@ Therefore I created this "shell". It's mostly created for my own usage - but, ma
 
 It's a python3 based CLI which also includes its own "python module" that can easily be used by others.
 
+The current best way to install this is:
+```
+$ git clone https://github.com/asbjorn/piscada-shell
+$ cd piscada-shell
+$ python3 -mvenv venv
+$ source venv/bin/activate
+# for Fish shell users -> 'source venv/bin/activate.fish'
+$ pip install -r requirements.txt
+$ python -mpiscada_shell
+```
 
 ## References
 
