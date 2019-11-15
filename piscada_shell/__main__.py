@@ -112,6 +112,38 @@ class PiscadaShell(cmd.Cmd):
             print(f"Hostname: {ctrl['hostname']}")
             print()
 
+    def do_controller_tag_timeseries(self, arg):
+        args = arg.split(" ")
+        if len(args) < 2:
+            print("Usage: controller_tag_timeseries CONTROLLER_ID TAG_NAME")
+            return
+        controller = args[0]
+        tag_name = args[1]
+
+        if self.auth_credentials is None:
+            print("Login before calling any API calls..")
+            return
+
+        access_tokens = self.auth_credentials.get('accessTokens', {})
+        historian_token = access_tokens.get('historian.piscada.cloud')
+        fut = piscada_shell.tag_timeseries(historian_token, controller, tag_name)
+
+        progress_marker_while_future(fut)
+        if fut.cancelled():
+            print("Action cancelled")
+            return
+
+        try:
+            result = fut.result()
+            print(f"Result: {result}")
+            if result.ok:
+                retval = result.json()
+                print(retval)
+            else:
+                print(f"Response NOT ok.. {result.status_code} {result.content}")
+        except CancelledError as err:
+            print(f"cancellederror: {err}")
+
     def do_logout(self, arg):
         self.prompt = '> '
         self.auth_credentials = None
