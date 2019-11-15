@@ -42,9 +42,37 @@ def parse_ts_timestamp(ts):
         return ts_parsed
 
 
-def timeseries(token, controller, tagName, **kwargs):
+def tag_timeseries(token, controller, tag_name, **kwargs):
+    auth_hdr = {"Authorization": f"Bearer {token}"}
+
     ts_from = kwargs.get('from', None)
     if ts_from:
         ts_from = parse_ts_timestamp(ts_from)
     else:
-        ts_from = datetime
+        ts_from = datetime.datetime.today() - datetime.timedelta(hours=1)
+        ts_from = ts_from.replace(microsecond=0).isoformat()
+
+    params = {
+        'from': ts_from,
+        'include_timestamps': 'true',
+        'time_format': 'epoch'
+    }
+
+    ts_to = kwargs.get('to', None)
+    if ts_to:
+        ts_to = parse_ts_timestamp(ts_to)
+        params.update({
+            'to': ts_to
+        })
+
+    tags = [tag_name,]
+
+    params.update({
+        'tags': tags
+    })
+
+    return session.get(
+        f'https://historian.piscada.cloud/{controller}/timeseries/{tag_name}',
+        params=params,
+        headers=auth_hdr
+    )
