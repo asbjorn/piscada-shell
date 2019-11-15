@@ -1,9 +1,7 @@
 import datetime
 from dateutil.parser import parse
 from requests_futures.sessions import FuturesSession
-# import requests
 
-# session = requests.Session()
 session = FuturesSession()
 
 

@@ -5,7 +5,6 @@ from concurrent.futures import CancelledError
 from time import sleep
 from itertools import cycle
 
-# import requests
 import piscada_shell
 
 
