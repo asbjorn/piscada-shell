@@ -24,6 +24,16 @@ class PiscadaShell(cmd.Cmd):
     auth_credentials = None
     controllers = None
 
+    def do_auth_tokens(self, arg):
+        if self.auth_credentials is None:
+            print("Need to login first")
+            return
+
+        access_tokens = self.auth_credentials.get('accessTokens', {})
+        for k, v in access_tokens.items():
+            print(f"key={k} -> value={v}")
+
+
     def do_login(self, arg):
         """Login to Piscada API - retrieve access tokens needed to call APIs"""
         print(f"Login..")
