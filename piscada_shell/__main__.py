@@ -113,6 +113,10 @@ class PiscadaShell(cmd.Cmd):
             print()
 
     def do_controller_tag_timeseries(self, arg):
+        """Output tag timeseries for the the chosen controller. Might change this to be more user friendly.
+
+        usage: controller_tag_timeseries CONTROLLER_ID TAG_NAME
+        """
         args = arg.split(" ")
         if len(args) < 2:
             print("Usage: controller_tag_timeseries CONTROLLER_ID TAG_NAME")
