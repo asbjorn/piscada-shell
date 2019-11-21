@@ -39,19 +39,14 @@ class PiscadaShell(cmd.Cmd):
         username = input('Username: ')
         password = getpass('Password: ')
 
-        # retval = piscada_shell.login(username, password)
-        # if retval is None:
-        #     print("Unable to login! Maybe wrong username and/or password?")
-        #     return
         fut = piscada_shell.login(username, password)
-
         progress_marker_while_future(fut)
         if fut.cancelled():
             print("Login cancelled")
         elif fut.done():
             try:
                 result = fut.result()
-                print(f"Login result: {result}")
+                # print(f"Login result: {result}")
                 if result.ok:
                     retval = result.json()
                     self.auth_credentials = retval
