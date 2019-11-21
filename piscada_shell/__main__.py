@@ -4,8 +4,14 @@ from getpass import getpass
 from concurrent.futures import CancelledError
 from time import sleep
 from itertools import cycle
+import functools
+from colorama import init, Fore, Back, Style
+from pprint import pprint
 
 import piscada_shell
+
+init()
+
 
 
 def progress_marker_while_future(fut):
@@ -17,32 +23,38 @@ def progress_marker_while_future(fut):
         sleep(0.2)
 
 
+def authenticated(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        s = args[0]
+        if s.auth_credentials is None:
+            print(Fore.RED + "Need to login first" + Fore.RESET)
+            return
+        return func(*args, **kwargs)
+    return wrapper
+
+
 class PiscadaShell(cmd.Cmd):
-    into = 'Welcome to Piscada Shell. Type help or ? to list commands.\n'
-    prompt = '> '
+    into = Fore.CYAN + 'Welcome to Piscada Shell. Type help or ? to list commands.\n' + Fore.RESET
+    prompt = Fore.CYAN + '> ' + Fore.RESET
     auth_credentials = None
     controllers = None
 
+    @authenticated
     def do_auth_tokens(self, arg):
-        if self.auth_credentials is None:
-            print("Need to login first")
-            return
-
         access_tokens = self.auth_credentials.get('accessTokens', {})
-        for k, v in access_tokens.items():
-            print(f"key={k} -> value={v}")
+        pprint(access_tokens)
 
 
     def do_login(self, arg):
         """Login to Piscada API - retrieve access tokens needed to call APIs"""
-        print(f"Login..")
-        username = input('Username: ')
-        password = getpass('Password: ')
+        username = input(Fore.WHITE + Style.DIM + 'Enter username: ' + Style.NORMAL + Fore.RESET)
+        password = getpass(Fore.WHITE + Style.DIM + 'Password: ' + Style.NORMAL + Fore.RESET)
 
         fut = piscada_shell.login(username, password)
         progress_marker_while_future(fut)
         if fut.cancelled():
-            print("Login cancelled")
+            print(Fore.RED + "Login cancelled" + Fore.RESET)
         elif fut.done():
             try:
                 result = fut.result()
@@ -63,6 +75,7 @@ class PiscadaShell(cmd.Cmd):
                 print(f"cancellederror: {err}")
 
 
+    @authenticated
     def do_list_controllers(self, arg):
         """List Piscada controllers assigned to your account.
         The result will be cached. To force a update append the '-u'
@@ -70,10 +83,6 @@ class PiscadaShell(cmd.Cmd):
 
         i.e. > list_controllers -u
         """
-        if self.auth_credentials is None:
-            print("Login before calling any API calls..")
-            return
-
         force_update = False
         if "-u" in arg or "--update" in arg:
             force_update = True
@@ -106,6 +115,7 @@ class PiscadaShell(cmd.Cmd):
             print(f"Hostname: {ctrl['hostname']}")
             print()
 
+    @authenticated
     def do_controller_tag_timeseries(self, arg):
         """Output tag timeseries for the the chosen controller. Might change this to be more user friendly.
 
@@ -117,10 +127,6 @@ class PiscadaShell(cmd.Cmd):
             return
         controller = args[0]
         tag_name = args[1]
-
-        if self.auth_credentials is None:
-            print("Login before calling any API calls..")
-            return
 
         access_tokens = self.auth_credentials.get('accessTokens', {})
         historian_token = access_tokens.get('historian.piscada.cloud')
