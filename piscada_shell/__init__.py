@@ -70,7 +70,7 @@ def tag_timeseries(token, controller, tag_name, **kwargs):
     })
 
     return session.get(
-        f'https://historian.piscada.cloud/{controller}/timeseries/{tag_name}',
+        f'https://historian.piscada.cloud/{controller}/timeseries/json-value/{tag_name}',
         params=params,
         headers=auth_hdr
     )
